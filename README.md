@@ -1,3 +1,5 @@
+jbavari/cordova-plugin-video-editor
+
 [![npm version](https://badge.fury.io/js/cordova-plugin-video-editor.svg)](https://badge.fury.io/js/cordova-plugin-video-editor)
 
 This is a cordova plugin to assist in several video editing tasks such as:
