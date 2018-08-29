@@ -18,6 +18,7 @@ public class CustomAndroidFormatStrategy implements MediaFormatStrategy {
     private static final int DEFAULT_FRAMERATE = 30;
     private static final int DEFAULT_WIDTH = 0;
     private static final int DEFAULT_HEIGHT = 0;
+    private static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
     private final int mBitRate;
     private final int mFrameRate;
     private final int width;
