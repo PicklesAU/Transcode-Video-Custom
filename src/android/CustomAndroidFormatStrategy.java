@@ -87,10 +87,13 @@ public class CustomAndroidFormatStrategy implements MediaFormatStrategy {
     }
 
     public MediaFormat createAudioOutputFormat(MediaFormat inputFormat) {  
+        return null;
+        /*
         final MediaFormat format = MediaFormat.createAudioFormat(MIMETYPE_AUDIO_AAC,
                 inputFormat.getInteger(MediaFormat.KEY_SAMPLE_RATE), 2);
         format.setInteger(MediaFormat.KEY_AAC_PROFILE, MediaCodecInfo.CodecProfileLevel.AACObjectLC);
         format.setInteger(MediaFormat.KEY_BIT_RATE, 128 * 1000);
         return format;
+        */
     }
 } 
