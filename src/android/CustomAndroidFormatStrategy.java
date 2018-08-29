@@ -13,64 +13,78 @@ import net.ypresto.androidtranscoder.format.OutputFormatUnavailableException;
  */
 public class CustomAndroidFormatStrategy implements MediaFormatStrategy {
 
-    public static final int AUDIO_BITRATE_AS_IS = -1;
-    public static final int AUDIO_CHANNELS_AS_IS = -1;
-    private static final String TAG = "720pFormatStrategy";
-    private static final int LONGER_LENGTH = 1280;
-    private static final int SHORTER_LENGTH = 720;
-    private static final int DEFAULT_VIDEO_BITRATE = 8000 * 1000; // From Nexus 4 Camera in 720p
-    public static final String MIMETYPE_AUDIO_AAC = "audio/mp4a-latm";
-    private final int mVideoBitrate;
-    private final int mAudioBitrate;
-    private final int mAudioChannels;
+    private static final String TAG = "CustomFormatStrategy";
+    private static final int DEFAULT_BITRATE = 8000000;
+    private static final int DEFAULT_FRAMERATE = 30;
+    private static final int DEFAULT_WIDTH = 0;
+    private static final int DEFAULT_HEIGHT = 0;
+    private final int mBitRate;
+    private final int mFrameRate;
+    private final int width;
+    private final int height;
 
     public CustomAndroidFormatStrategy() {
-        this(DEFAULT_VIDEO_BITRATE);
+        this.mBitRate = DEFAULT_BITRATE;
+        this.mFrameRate = DEFAULT_FRAMERATE;
+        this.width = DEFAULT_WIDTH;
+        this.height = DEFAULT_HEIGHT;
     }
 
-    public CustomAndroidFormatStrategy(int videoBitrate) {
-        this(videoBitrate, AUDIO_BITRATE_AS_IS, AUDIO_CHANNELS_AS_IS);
+    public CustomAndroidFormatStrategy(final int bitRate, final int frameRate, final int width, final int height) {
+        this.mBitRate = bitRate;
+        this.mFrameRate = frameRate;
+        this.width = width;
+        this.height = height;
     }
 
-    public CustomAndroidFormatStrategy(int videoBitrate, int audioBitrate, int audioChannels) {
-        mVideoBitrate = videoBitrate;
-        mAudioBitrate = audioBitrate;
-        mAudioChannels = audioChannels;
-    }
-
-    @Override
     public MediaFormat createVideoOutputFormat(MediaFormat inputFormat) {
-        int width = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
-        int height = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
-        int longer, shorter, outWidth, outHeight;
-        if (width >= height) {
-            longer = width;
-            shorter = height;
-            outWidth = LONGER_LENGTH;
-            outHeight = SHORTER_LENGTH;
+        int inWidth = inputFormat.getInteger(MediaFormat.KEY_WIDTH);
+        int inHeight = inputFormat.getInteger(MediaFormat.KEY_HEIGHT);
+        int inLonger, inShorter, outWidth, outHeight, outLonger;
+        double aspectRatio;
+
+        if (this.width >= this.height) {
+            outLonger = this.width;
         } else {
-            shorter = width;
-            longer = height;
-            outWidth = SHORTER_LENGTH;
-            outHeight = LONGER_LENGTH;
+            outLonger = this.height;
         }
-        if (longer * 9 != shorter * 16) {
-            throw new OutputFormatUnavailableException("This video is not 16:9, and is not able to transcode. (" + width + "x" + height + ")");
+
+        if (inWidth >= inHeight) {
+            inLonger = inWidth;
+            inShorter = inHeight;
+
+        } else {
+            inLonger = inHeight;
+            inShorter = inWidth;
+
         }
-        if (shorter <= SHORTER_LENGTH) {
-            Log.d(TAG, "This video is less or equal to 720p, pass-through. (" + width + "x" + height + ")");
-            return null;
+
+        if (inLonger > outLonger && outLonger > 0) {
+            if (inWidth >= inHeight) {
+                aspectRatio = (double) inLonger / (double) inShorter;
+                outWidth = outLonger;
+                outHeight = Double.valueOf(outWidth / aspectRatio).intValue();
+
+            } else {
+                aspectRatio = (double) inLonger / (double) inShorter;
+                outHeight = outLonger;
+                outWidth = Double.valueOf(outHeight / aspectRatio).intValue();
+            }
+        } else {
+            outWidth = inWidth;
+            outHeight = inHeight;
         }
+
         MediaFormat format = MediaFormat.createVideoFormat("video/avc", outWidth, outHeight);
-        // From Nexus 4 Camera in 720p
-        format.setInteger(MediaFormat.KEY_BIT_RATE, mVideoBitrate);
-        format.setInteger(MediaFormat.KEY_FRAME_RATE, 30);
+        format.setInteger(MediaFormat.KEY_BIT_RATE, mBitRate);
+        format.setInteger(MediaFormat.KEY_FRAME_RATE, mFrameRate);
         format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 3);
         format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+
         return format;
+
     }
 
-    @Override
     public MediaFormat createAudioOutputFormat(MediaFormat inputFormat) {
         if (mAudioBitrate == AUDIO_BITRATE_AS_IS || mAudioChannels == AUDIO_CHANNELS_AS_IS) return null;
 
@@ -81,5 +95,4 @@ public class CustomAndroidFormatStrategy implements MediaFormatStrategy {
         format.setInteger(MediaFormat.KEY_BIT_RATE, mAudioBitrate);
         return format;
     }
-
-}
+} 
