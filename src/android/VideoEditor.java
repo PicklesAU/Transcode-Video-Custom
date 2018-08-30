@@ -242,7 +242,7 @@ public class VideoEditor extends CordovaPlugin {
 
                     
                     MediaTranscoder.getInstance().transcodeVideo(fin.getFD(), outputFilePath,
-                            new CustomAndroidFormatStrategy(videoBitrate, fps, width, height), listener, videoDuration);
+                            new CustomAndroidFormatStrategy(videoBitrate, fps, width, height), listener);
                     
                 } catch (Throwable e) {
                     Log.d(TAG, "transcode exception ", e);
